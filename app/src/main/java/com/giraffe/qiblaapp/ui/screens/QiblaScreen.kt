@@ -21,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.giraffe.qiblaapp.common.RequestLocationPermission
+import com.giraffe.qiblaapp.common.calculateBearing
 import com.giraffe.qiblaapp.common.getCurrentLocation
 import com.giraffe.qiblaapp.ui.components.Compass
 import kotlin.math.floor
@@ -36,6 +37,7 @@ fun QiblaScreen(modifier: Modifier = Modifier) {
     val meccaLocation = remember { Pair(21.422512, 39.826184) }
     val currentLocation = remember { mutableStateOf(Pair(0.0, 0.0)) }
     val locationErrorText = remember { mutableStateOf<String?>(null) }
+    val qiblaAngle = remember { mutableFloatStateOf(0f) }
 
 
     RequestLocationPermission(
@@ -44,6 +46,10 @@ fun QiblaScreen(modifier: Modifier = Modifier) {
                 context = context,
                 onGetCurrentLocationSuccess = {
                     currentLocation.value = Pair(it.first, it.second)
+                    qiblaAngle.floatValue = calculateBearing(
+                        firstLocation = currentLocation.value,
+                        secondLocation = meccaLocation
+                    )
                 },
                 onGetCurrentLocationFailed = {
                     locationErrorText.value =
@@ -62,11 +68,6 @@ fun QiblaScreen(modifier: Modifier = Modifier) {
                         val rotationMatrix = FloatArray(9)
                         val orientationAngles = FloatArray(3)
                         SensorManager.getRotationMatrixFromVector(rotationMatrix, event.values)
-                        /*
-                            /  R[ 0]   R[ 1]   R[ 2]   \
-                            |  R[ 3]   R[ 4]   R[ 5]   |
-                            \  R[ 6]   R[ 7]   R[ 8]   /
-                        */
                         SensorManager.getOrientation(rotationMatrix, orientationAngles)
                         val azimuth =
                             orientationAngles[0]//angle of rotation about the -z axis. This value represents the angle between the device's y axis and the magnetic north pole.
@@ -99,8 +100,12 @@ fun QiblaScreen(modifier: Modifier = Modifier) {
             Text(
                 text = "(North) Actual angle: ${floor(actualNorthAngle)}°"
             )
+            Text("(Qibla) Angle degree: ${qiblaAngle.floatValue}°")
         }
-        Compass(rotationAngle = northAngle)
+        Compass(
+            rotationAngle = northAngle,
+            qiblaAngle = qiblaAngle.floatValue
+        )
         Column(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
@@ -115,7 +120,6 @@ fun QiblaScreen(modifier: Modifier = Modifier) {
                 }
                     ?: Text(text = "Current location: ${currentLocation.value.first} , ${currentLocation.value.second}")
             }
-
         }
     }
 }
