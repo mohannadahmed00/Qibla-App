@@ -8,19 +8,22 @@ import android.hardware.SensorManager
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import com.giraffe.qiblaapp.common.RequestLocationPermission
+import com.giraffe.qiblaapp.common.getCurrentLocation
 import com.giraffe.qiblaapp.ui.components.Compass
 import kotlin.math.floor
-
 
 @Composable
 fun QiblaScreen(modifier: Modifier = Modifier) {
@@ -29,6 +32,28 @@ fun QiblaScreen(modifier: Modifier = Modifier) {
     val rotationVectorSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR)
     var northAngle by remember { mutableFloatStateOf(0f) }
     var actualNorthAngle by remember { mutableFloatStateOf(0f) }
+
+    val meccaLocation = remember { Pair(21.422512, 39.826184) }
+    val currentLocation = remember { mutableStateOf(Pair(0.0, 0.0)) }
+    val locationErrorText = remember { mutableStateOf<String?>(null) }
+
+
+    RequestLocationPermission(
+        onPermissionGranted = {
+            getCurrentLocation(
+                context = context,
+                onGetCurrentLocationSuccess = {
+                    currentLocation.value = Pair(it.first, it.second)
+                },
+                onGetCurrentLocationFailed = {
+                    locationErrorText.value =
+                        it.localizedMessage ?: "Error getting current location"
+                },
+            )
+        },
+        onPermissionDenied = { locationErrorText.value = "Permission denied :(" }
+    )
+
     DisposableEffect(Unit) {
         val sensorEventListener =
             object : SensorEventListener {
@@ -76,6 +101,22 @@ fun QiblaScreen(modifier: Modifier = Modifier) {
             )
         }
         Compass(rotationAngle = northAngle)
+        Column(
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Column(
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.Start
+            ) {
+                Text(text = "Mecca location: ${meccaLocation.first} , ${meccaLocation.second}")
+                locationErrorText.value?.let {
+                    Text("Current location: $it", color = MaterialTheme.colorScheme.error)
+                }
+                    ?: Text(text = "Current location: ${currentLocation.value.first} , ${currentLocation.value.second}")
+            }
+
+        }
     }
 }
 
