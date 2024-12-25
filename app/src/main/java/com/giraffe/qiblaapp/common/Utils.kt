@@ -1,5 +1,6 @@
 package com.giraffe.qiblaapp.common
 
+import java.util.Locale
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
@@ -28,3 +29,7 @@ fun calculateBearing(
 
     return bearing.toFloat()
 }
+
+
+fun Float.justTwoDigits() = String.format(Locale.US, "%.2f", this).toFloat()
+fun Double.justTwoDigits() = String.format(Locale.US, "%.2f", this).toFloat()

@@ -18,14 +18,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.giraffe.qiblaapp.R
-import kotlin.math.floor
 
 @Composable
 fun Compass(modifier: Modifier = Modifier, rotationAngle: Float = 0f, qiblaAngle: Float = 0f) {
     val northAngle = remember(rotationAngle) {
-        if (rotationAngle < 0) floor(360 - rotationAngle) else -floor(
-            rotationAngle
-        )
+        if (rotationAngle < 0) (360 - rotationAngle) else -rotationAngle
     }
 
     Box(

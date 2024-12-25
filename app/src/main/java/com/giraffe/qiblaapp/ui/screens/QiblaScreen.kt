@@ -23,8 +23,8 @@ import androidx.compose.ui.platform.LocalContext
 import com.giraffe.qiblaapp.common.RequestLocationPermission
 import com.giraffe.qiblaapp.common.calculateBearing
 import com.giraffe.qiblaapp.common.getCurrentLocation
+import com.giraffe.qiblaapp.common.justTwoDigits
 import com.giraffe.qiblaapp.ui.components.Compass
-import kotlin.math.floor
 
 @Composable
 fun QiblaScreen(modifier: Modifier = Modifier) {
@@ -81,7 +81,7 @@ fun QiblaScreen(modifier: Modifier = Modifier) {
         sensorManager.registerListener(
             sensorEventListener,
             rotationVectorSensor,
-            SensorManager.SENSOR_DELAY_UI
+            SensorManager.SENSOR_DELAY_GAME
         )
         onDispose {
             sensorManager.unregisterListener(sensorEventListener)
@@ -96,11 +96,11 @@ fun QiblaScreen(modifier: Modifier = Modifier) {
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.Start
         ) {
-            Text(text = "(North) Angle: ${floor(northAngle)}°")
+            Text(text = "(North) Angle: ${northAngle.justTwoDigits()}°")
             Text(
-                text = "(North) Actual angle: ${floor(actualNorthAngle)}°"
+                text = "(North) Actual angle: ${actualNorthAngle.justTwoDigits()}°"
             )
-            Text("(Qibla) Angle degree: ${qiblaAngle.floatValue}°")
+            Text("(Qibla) Angle degree: ${qiblaAngle.floatValue.justTwoDigits()}°")
         }
         Compass(
             rotationAngle = northAngle,
@@ -114,11 +114,11 @@ fun QiblaScreen(modifier: Modifier = Modifier) {
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.Start
             ) {
-                Text(text = "Mecca location: ${meccaLocation.first} , ${meccaLocation.second}")
+                Text(text = "Mecca location: ${meccaLocation.first.justTwoDigits()} , ${meccaLocation.second.justTwoDigits()}")
                 locationErrorText.value?.let {
                     Text("Current location: $it", color = MaterialTheme.colorScheme.error)
                 }
-                    ?: Text(text = "Current location: ${currentLocation.value.first} , ${currentLocation.value.second}")
+                    ?: Text(text = "Current location: ${currentLocation.value.first.justTwoDigits()} , ${currentLocation.value.second.justTwoDigits()}")
             }
         }
     }
