@@ -20,38 +20,61 @@ import androidx.compose.ui.unit.dp
 import com.giraffe.qiblaapp.R
 
 @Composable
-fun Compass(modifier: Modifier = Modifier, rotationAngle: Float = 0f, qiblaAngle: Float = 0f) {
+fun Compass(
+    modifier: Modifier = Modifier,
+    rotationAngle: Float = 0f,
+    qiblaAngle: Float = 0f,
+    pitchAngle: Float = 0f,
+    rollAngle: Float = 0f
+) {
     val northAngle = remember(rotationAngle) {
         if (rotationAngle < 0) (360 - rotationAngle) else -rotationAngle
     }
 
     Box(
         modifier = modifier
-            .aspectRatio(1.0f)
-            .graphicsLayer(
-                rotationZ = northAngle + qiblaAngle
-            )
-            .clip(CircleShape),
-        contentAlignment = Alignment.TopCenter
+            .aspectRatio(1.0f),
+        contentAlignment = Alignment.Center
     ) {
-        Image(
-            painter = painterResource(id = R.drawable.compass),
-            contentDescription = "compass",
-            modifier = Modifier
-                .padding(50.dp)
+        Box(
+            modifier = modifier
                 .aspectRatio(1.0f)
                 .graphicsLayer(
-                    rotationZ = -qiblaAngle
+                    rotationZ = northAngle + qiblaAngle
+                )
+                .clip(CircleShape),
+            contentAlignment = Alignment.TopCenter
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.compass),
+                contentDescription = "compass",
+                modifier = Modifier
+                    .padding(50.dp)
+                    .aspectRatio(1.0f)
+                    .graphicsLayer(
+                        rotationZ = -qiblaAngle
+                    )
+                    .clip(CircleShape)
+                    .background(Color.White),
+                contentScale = ContentScale.Fit
+            )
+            Image(
+                modifier = Modifier.size(80.dp),
+                painter = painterResource(id = R.drawable.kaaba),
+                contentDescription = "kaaba",
+            )
+        }
+        Box(
+            modifier = Modifier
+                .size(10.dp)
+                .graphicsLayer(
+                    translationY = pitchAngle,
+                    translationX = -rollAngle
                 )
                 .clip(CircleShape)
-                .background(Color.White),
-            contentScale = ContentScale.Fit
-        )
-        Image(
-            modifier = Modifier.size(80.dp),
-            painter = painterResource(id = R.drawable.kaaba),
-            contentDescription = "kaaba",
+                .background(Color.Red.copy(alpha = 0.7f))
         )
     }
+
 
 }

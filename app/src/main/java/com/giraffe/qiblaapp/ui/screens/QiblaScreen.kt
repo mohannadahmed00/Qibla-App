@@ -31,8 +31,12 @@ fun QiblaScreen(modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
     val rotationVectorSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR)
-    var northAngle by remember { mutableFloatStateOf(0f) }
+    var azimuthAngle by remember { mutableFloatStateOf(0f) }
+    var pitchAngle by remember { mutableFloatStateOf(0f) }
+    var rollAngle by remember { mutableFloatStateOf(0f) }
+
     var actualNorthAngle by remember { mutableFloatStateOf(0f) }
+
 
     val meccaLocation = remember { Pair(21.422512, 39.826184) }
     val currentLocation = remember { mutableStateOf(Pair(0.0, 0.0)) }
@@ -71,8 +75,15 @@ fun QiblaScreen(modifier: Modifier = Modifier) {
                         SensorManager.getOrientation(rotationMatrix, orientationAngles)
                         val azimuth =
                             orientationAngles[0]//angle of rotation about the -z axis. This value represents the angle between the device's y axis and the magnetic north pole.
-                        northAngle = Math.toDegrees(azimuth.toDouble()).toFloat()
-                        actualNorthAngle = if (northAngle < 0) northAngle + 360 else northAngle
+                        val pitch =
+                            orientationAngles[1]//angle of rotation about the x axis. This value represents the angle between a plane parallel to the device's screen and a plane parallel to the ground.
+                        val roll =
+                            orientationAngles[2]//angle of rotation about the y axis. This value represents the angle between a plane perpendicular to the device's screen and a plane perpendicular to the ground.
+                        azimuthAngle = Math.toDegrees(azimuth.toDouble()).toFloat()
+                        pitchAngle = Math.toDegrees(pitch.toDouble()).toFloat()
+                        rollAngle = Math.toDegrees(roll.toDouble()).toFloat()
+                        actualNorthAngle =
+                            if (azimuthAngle < 0) azimuthAngle + 360 else azimuthAngle
                     }
                 }
 
@@ -96,15 +107,16 @@ fun QiblaScreen(modifier: Modifier = Modifier) {
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.Start
         ) {
-            Text(text = "(North) Angle: ${northAngle.justTwoDigits()}°")
-            Text(
-                text = "(North) Actual angle: ${actualNorthAngle.justTwoDigits()}°"
-            )
+            Text(text = "(Pitch) Angle: ${pitchAngle.justTwoDigits()}°")
+            Text(text = "(Roll) Angle: ${rollAngle.justTwoDigits()}°")
+            Text(text = "(Azimuth) Angle: ${azimuthAngle.justTwoDigits()}°")
+            Text(text = "(North) Angle: ${actualNorthAngle.justTwoDigits()}°")
             Text("(Qibla) Angle degree: ${qiblaAngle.floatValue.justTwoDigits()}°")
         }
         Compass(
-            rotationAngle = northAngle,
-            qiblaAngle = qiblaAngle.floatValue
+            rotationAngle = azimuthAngle, qiblaAngle = qiblaAngle.floatValue,
+            pitchAngle = pitchAngle,
+            rollAngle = rollAngle,
         )
         Column(
             verticalArrangement = Arrangement.Center,
